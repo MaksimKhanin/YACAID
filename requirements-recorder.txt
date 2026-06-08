@@ -1,0 +1,7 @@
+# Recorder (runs on the local machine, talks to RTSP cameras)
+opencv-python
+ultralytics
+PyYAML
+requests
+fastapi
+uvicorn[standard]

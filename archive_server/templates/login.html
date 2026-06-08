@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Вход — YACAID Архив</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="login-body">
+    <form class="login-card" method="post" action="/login">
+        <h1>YACAID Архив</h1>
+        {% if error %}<p class="error">{{ error }}</p>{% endif %}
+        <label>Логин<input type="text" name="username" autocomplete="username" required autofocus></label>
+        <label>Пароль<input type="password" name="password" autocomplete="current-password" required></label>
+        <button type="submit">Войти</button>
+    </form>
+</body>
+</html>

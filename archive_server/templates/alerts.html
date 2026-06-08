@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Тревоги</h1>
+<div class="media-grid" id="grid">
+    {% include "_media_grid.html" %}
+</div>
+{% if not items %}<p class="empty">Тревог пока нет</p>{% endif %}
+{% endblock %}

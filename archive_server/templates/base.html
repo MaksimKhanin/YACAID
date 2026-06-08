@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>{{ title or "YACAID Архив" }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body>
+    <header class="topbar">
+        <span class="brand">YACAID</span>
+        <form action="/logout" method="post" class="logout-form">
+            <button type="submit" class="link-btn">Выйти</button>
+        </form>
+    </header>
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="/alerts" class="{{ 'active' if active_tab == 'alerts' else '' }}">
+            <span class="icon">⚠</span><span>Тревоги</span>
+        </a>
+        <a href="/archive" class="{{ 'active' if active_tab == 'archive' else '' }}">
+            <span class="icon">🗂</span><span>Архив</span>
+        </a>
+    </nav>
+</body>
+</html>

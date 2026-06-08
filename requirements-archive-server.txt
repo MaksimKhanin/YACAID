@@ -1,0 +1,12 @@
+# Archive server (runs on the VPS, serves the mobile UI + ingest API)
+fastapi
+uvicorn[standard]
+jinja2
+sqlalchemy
+psycopg2-binary
+alembic
+bcrypt
+itsdangerous
+python-multipart
+opencv-python-headless
+requests

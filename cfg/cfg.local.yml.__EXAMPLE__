@@ -1,0 +1,13 @@
+# Untracked overrides merged on top of cfg.yml — put real secrets here.
+# Copy this file to cfg.local.yml (gitignored) and fill in real values.
+stream_cfg:
+  camera_1:
+    stream_detector: "rtsp://real_user:real_password@192.168.0.24:554/h264/ch01/sub/av_stream"
+    stream_video: "rtsp://real_user:real_password@192.168.0.24:554/h264/ch01/main/av_stream"
+
+archive_sync:
+  base_url: "https://archive.example.com"
+  api_key: "REPLACE_WITH_REAL_API_KEY"
+
+control:
+  token: "REPLACE_WITH_REAL_CONTROL_TOKEN"

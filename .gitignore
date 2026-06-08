@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+
+cfg/cfg.yml
+cfg/cfg.local.yml
+.env
+
+logs/
+Resources/
+*.7z
+*.pt
+
+archive_server/.env
+archive_server/media/

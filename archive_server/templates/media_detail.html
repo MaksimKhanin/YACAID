@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="javascript:history.back()" class="back-link">← Назад</a>
+
+<div class="detail">
+    {% if media.kind == 'video' %}
+    <video controls playsinline src="/files/{{ media.id }}"></video>
+    {% else %}
+    <img src="/files/{{ media.id }}" alt="{{ media.filename }}">
+    {% endif %}
+
+    <dl class="detail-meta">
+        <dt>Камера</dt><dd>{{ media.camera }}</dd>
+        <dt>Время</dt><dd>{{ media.captured_at.strftime('%d.%m.%Y %H:%M:%S') }}</dd>
+        {% if media.is_alert %}
+        <dt>Тревога</dt><dd>{{ media.detected_class }} (площадь {{ media.area }}, уверенность {{ '%.0f'|format((media.confidence or 0) * 100) }}%)</dd>
+        {% endif %}
+        <dt>Файл</dt><dd>{{ media.filename }}</dd>
+    </dl>
+</div>
+{% endblock %}

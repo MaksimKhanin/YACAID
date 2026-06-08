@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Камера {{ camera }}</h1>
+
+<div class="camera-actions">
+    <button class="action-btn" hx-post="/control/{{ camera }}/alarm-on" hx-swap="none">Тревога ВКЛ</button>
+    <button class="action-btn" hx-post="/control/{{ camera }}/alarm-off" hx-swap="none">Тревога ВЫКЛ</button>
+    <button class="action-btn" hx-post="/control/{{ camera }}/photo" hx-swap="none">Снимок</button>
+    <button class="action-btn" hx-post="/control/{{ camera }}/record" hx-swap="none">Запись</button>
+</div>
+
+<div class="media-grid" id="grid">
+    {% include "_media_grid.html" %}
+</div>
+{% if not items %}<p class="empty">Нет файлов</p>{% endif %}
+{% endblock %}

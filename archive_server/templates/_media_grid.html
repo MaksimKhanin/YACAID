@@ -1,0 +1,22 @@
+{% for item in items %}
+<a href="/media/{{ item.id }}" class="media-card">
+    <div class="thumb-wrap">
+        <img src="/thumbs/{{ item.id }}" loading="lazy" alt="{{ item.filename }}">
+        {% if item.kind == 'video' %}<span class="badge badge-video">▶</span>{% endif %}
+        {% if item.is_alert %}<span class="badge badge-alert">⚠ {{ item.detected_class or '' }}</span>{% endif %}
+    </div>
+    <div class="meta">
+        <span class="camera">{{ item.camera }}</span>
+        <span class="time">{{ item.captured_at.strftime('%d.%m %H:%M') }}</span>
+    </div>
+</a>
+{% endfor %}
+
+{% if has_more %}
+<div class="load-more"
+     hx-get="{{ next_url }}"
+     hx-trigger="revealed"
+     hx-swap="outerHTML">
+    Загрузка...
+</div>
+{% endif %}
