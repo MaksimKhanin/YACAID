@@ -6,9 +6,9 @@ from fastapi import Depends, HTTPException, Request
 from itsdangerous import BadSignature, URLSafeTimedSerializer
 from sqlalchemy.orm import Session
 
-from archive_server.config import settings
-from archive_server.db import get_db
-from archive_server.models import User
+from archive_server.core.config import settings
+from archive_server.core.db import get_db
+from archive_server.core.models import User
 
 SESSION_COOKIE_NAME = "yacaid_session"
 SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 30  # 30 days

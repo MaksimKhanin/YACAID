@@ -20,3 +20,11 @@ control:
   host: "127.0.0.1"
   port: 8090
   token: ""           # override with env CONTROL_API_TOKEN
+
+# Optional: lets the recorder orchestrate the rest of the smart home (lights, switches,
+# sensors, ...) by proxying to a local Home Assistant instance instead of reimplementing
+# device drivers. Leave base_url empty to disable. Create a long-lived access token in
+# HA under your profile -> "Long-lived access tokens".
+home_assistant:
+  base_url: ""        # e.g. "http://homeassistant.local:8123" — override with env HOME_ASSISTANT_URL
+  token: ""           # override with env HOME_ASSISTANT_TOKEN

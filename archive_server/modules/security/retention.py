@@ -1,14 +1,14 @@
 """Periodic storage retention: removes media (and DB rows) older than max_age_days.
 
 Run as a standalone process/cron, e.g.:
-  python -m archive_server.retention --max-age-days 90
+  python -m archive_server.modules.security.retention --max-age-days 90
 """
 import argparse
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from archive_server.db import SessionLocal
-from archive_server.models import Media
+from archive_server.core.db import SessionLocal
+from archive_server.modules.security.models import Media
 from logger_setup import get_logger
 
 logger = get_logger("retention")

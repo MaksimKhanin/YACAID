@@ -1,0 +1,14 @@
+.git/
+.idea/
+.venv/
+__pycache__/
+*.pyc
+logs/
+Resources/
+*.7z
+*.pt
+archive_server/media/
+archive_server/.env
+cfg/cfg.yml
+cfg/cfg.local.yml
+recorder/

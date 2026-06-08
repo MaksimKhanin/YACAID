@@ -3,8 +3,8 @@ local control API, reachable only over a private tunnel (Tailscale/WireGuard).""
 import requests
 from fastapi import APIRouter, Depends, HTTPException
 
-from archive_server.auth import get_current_user
-from archive_server.config import settings
+from archive_server.core.auth import get_current_user
+from archive_server.core.config import settings
 from logger_setup import get_logger
 
 router = APIRouter(prefix="/control", dependencies=[Depends(get_current_user)])

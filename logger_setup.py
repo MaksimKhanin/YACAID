@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 LOG_DIR = "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
-def cleanup_old_logs(days=3):
+def cleanup_old_logs(days=10):
     """Удаляет лог-файлы старше указанного количества дней."""
     now = datetime.now()
     for filename in os.listdir(LOG_DIR):
@@ -28,7 +28,7 @@ def get_logger(name, level=logging.INFO):
     :param level: уровень логирования
     :return: logging.Logger
     """
-    cleanup_old_logs(days=3)  # чистим старые логи при создании любого логгера
+    cleanup_old_logs(days=10)  # чистим старые логи при создании любого логгера
 
     logger = logging.getLogger(name)
     if logger.handlers:
@@ -41,7 +41,7 @@ def get_logger(name, level=logging.INFO):
         log_file,
         when="midnight",
         interval=1,
-        backupCount=3,  # хранить до 3 файлов (сегодня + 2 предыдущих дня)
+        backupCount=10,  # хранить до 10 файлов (сегодня + 9 предыдущих дней)
         encoding="utf-8"
     )
     handler.suffix = "%Y-%m-%d"  # формат имени ротированного файла: camera1.log.2025-01-10
