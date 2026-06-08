@@ -39,10 +39,18 @@ class ControlConfig:
 
 
 @dataclass
+class HomeAssistantConfig:
+    base_url: str = ""
+    token: str = ""
+    enabled: bool = False
+
+
+@dataclass
 class AppConfig:
     cameras: Dict[str, CameraConfig] = field(default_factory=dict)
     archive_sync: ArchiveSyncConfig = field(default_factory=ArchiveSyncConfig)
     control: ControlConfig = field(default_factory=ControlConfig)
+    home_assistant: HomeAssistantConfig = field(default_factory=HomeAssistantConfig)
 
 
 def _deep_merge(base: dict, override: dict) -> dict:
@@ -104,4 +112,12 @@ def load_config() -> AppConfig:
         token=os.environ.get("CONTROL_API_TOKEN", control_raw.get("token", "")),
     )
 
-    return AppConfig(cameras=cameras, archive_sync=archive_sync, control=control)
+    ha_raw = raw.get("home_assistant") or {}
+    ha_base_url = os.environ.get("HOME_ASSISTANT_URL", ha_raw.get("base_url", ""))
+    home_assistant = HomeAssistantConfig(
+        base_url=ha_base_url,
+        token=os.environ.get("HOME_ASSISTANT_TOKEN", ha_raw.get("token", "")),
+        enabled=bool(ha_base_url),
+    )
+
+    return AppConfig(cameras=cameras, archive_sync=archive_sync, control=control, home_assistant=home_assistant)

@@ -50,9 +50,10 @@ def _file_handler_proc(archive_cfg):
         time.sleep(60)
 
 
-def _control_proc(camera_names, control_cfg):
-    main_logger.info(f"Запуск control-API на {control_cfg.host}:{control_cfg.port}")
-    run_control_server(camera_names, control_cfg)
+def _control_proc(camera_names, control_cfg, ha_cfg):
+    suffix = " (с интеграцией Home Assistant)" if ha_cfg.enabled else ""
+    main_logger.info(f"Запуск control-API на {control_cfg.host}:{control_cfg.port}{suffix}")
+    run_control_server(camera_names, control_cfg, ha_cfg)
 
 
 class ProcessSpec:
@@ -78,7 +79,8 @@ def build_process_specs(cfg: AppConfig):
     specs = [ProcessSpec("file_handler", _file_handler_proc, args=(cfg.archive_sync,))]
 
     if cfg.control.token:
-        specs.append(ProcessSpec("control_api", _control_proc, args=(list(cfg.cameras.keys()), cfg.control)))
+        specs.append(ProcessSpec("control_api", _control_proc,
+                                 args=(list(cfg.cameras.keys()), cfg.control, cfg.home_assistant)))
     else:
         main_logger.warning("CONTROL_API_TOKEN не задан — локальный control-API отключён")
 

@@ -11,3 +11,7 @@ archive_sync:
 
 control:
   token: "REPLACE_WITH_REAL_CONTROL_TOKEN"
+
+home_assistant:
+  base_url: "http://homeassistant.local:8123"
+  token: "REPLACE_WITH_REAL_LONG_LIVED_ACCESS_TOKEN"
