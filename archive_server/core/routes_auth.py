@@ -8,8 +8,10 @@ from archive_server.core.auth import (
 )
 from archive_server.core.db import get_db
 from archive_server.core.templating import templates
+from logger_setup import get_logger
 
 router = APIRouter()
+logger = get_logger("auth")
 
 
 @router.get("/login", response_class=HTMLResponse)
@@ -23,15 +25,19 @@ def login_form(request: Request, user=Depends(get_optional_user)):
 def login_submit(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     user = authenticate(db, username, password)
     if user is None:
+        logger.warning(f"Неудачная попытка входа: username={username!r}, ip={request.client.host if request.client else '?'}")
         return templates.TemplateResponse(request, "login.html", {"error": "Неверный логин или пароль"}, status_code=401)
 
+    logger.info(f"Вход выполнен: username={user.username} (id={user.id})")
     response = RedirectResponse("/", status_code=302)
     set_session_cookie(response, user)
     return response
 
 
 @router.post("/logout")
-def logout():
+def logout(user=Depends(get_optional_user)):
+    if user:
+        logger.info(f"Выход из системы: username={user.username} (id={user.id})")
     response = RedirectResponse("/login", status_code=302)
     clear_session_cookie(response)
     return response
