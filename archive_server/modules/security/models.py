@@ -1,9 +1,14 @@
-"""ORM models: Media (synced files + metadata) and User (UI login)."""
+"""ORM models for the security module: archived camera media and AI-detection metadata.
+
+Media is shared across the whole household (everyone in the family sees the same
+cameras/alerts) — unlike per-user module data such as finance or diet logs, it carries
+no user_id/owner column.
+"""
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, UniqueConstraint
 
-from archive_server.db import Base
+from archive_server.core.db import Base
 
 
 class Media(Base):
@@ -24,11 +29,3 @@ class Media(Base):
     detected_class = Column(String(64), nullable=True)
     confidence = Column(Float, nullable=True)
     area = Column(Integer, nullable=True)
-
-
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True)
-    username = Column(String(64), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)

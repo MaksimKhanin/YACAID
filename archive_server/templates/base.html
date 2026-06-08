@@ -20,12 +20,11 @@
     </main>
 
     <nav class="bottom-nav">
-        <a href="/alerts" class="{{ 'active' if active_tab == 'alerts' else '' }}">
-            <span class="icon">⚠</span><span>Тревоги</span>
+        {% for item in nav_items %}
+        <a href="{{ item.url }}" class="{{ 'active' if active_tab == item.slug else '' }}">
+            <span class="icon">{{ item.icon }}</span><span>{{ item.label }}</span>
         </a>
-        <a href="/archive" class="{{ 'active' if active_tab == 'archive' else '' }}">
-            <span class="icon">🗂</span><span>Архив</span>
-        </a>
+        {% endfor %}
     </nav>
 </body>
 </html>

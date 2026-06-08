@@ -1,0 +1,49 @@
+# Brings up the household-manager UI (archive_server) together with its Postgres DB.
+# The recorder/detector is a separate component that runs on the local machine next
+# to the cameras and talks to this stack over the ingest (/api/media) and control APIs.
+#
+# Usage:
+#   cp .env.__EXAMPLE__ .env   # fill in real secrets
+#   docker compose up -d --build
+#   docker compose exec archive_server python -m archive_server.core.create_user <username> <password>
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: yacaid
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: yacaid_archive
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yacaid -d yacaid_archive"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  archive_server:
+    build:
+      context: .
+      dockerfile: archive_server/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://yacaid:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/yacaid_archive
+      MEDIA_ROOT: /media
+      ARCHIVE_API_KEY: ${ARCHIVE_API_KEY:?set ARCHIVE_API_KEY in .env}
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET in .env}
+      CONTROL_BASE_URL: ${CONTROL_BASE_URL:-}
+      CONTROL_API_TOKEN: ${CONTROL_API_TOKEN:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+    volumes:
+      - media_data:/media
+    ports:
+      - "${ARCHIVE_SERVER_PORT:-8000}:8000"
+
+volumes:
+  db_data:
+  media_data:

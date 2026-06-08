@@ -5,11 +5,11 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
-from archive_server.config import settings
-from archive_server.db import get_db
-from archive_server.filenames import guess_kind, parse_captured_at
-from archive_server.models import Media
-from archive_server.thumbnails import generate_thumbnail
+from archive_server.core.config import settings
+from archive_server.core.db import get_db
+from archive_server.modules.security.filenames import guess_kind, parse_captured_at
+from archive_server.modules.security.models import Media
+from archive_server.modules.security.thumbnails import generate_thumbnail
 from logger_setup import get_logger
 
 router = APIRouter()

@@ -1,17 +1,17 @@
 """CLI helper to create/update a UI login user.
 
-Usage: python -m archive_server.create_user <username> <password>
+Usage: python -m archive_server.core.create_user <username> <password>
 """
 import sys
 
-from archive_server.auth import hash_password
-from archive_server.db import Base, SessionLocal, engine
-from archive_server.models import User
+from archive_server.core.auth import hash_password
+from archive_server.core.db import Base, SessionLocal, engine
+from archive_server.core.models import User
 
 
 def main():
     if len(sys.argv) != 3:
-        print("Usage: python -m archive_server.create_user <username> <password>")
+        print("Usage: python -m archive_server.core.create_user <username> <password>")
         raise SystemExit(1)
 
     username, password = sys.argv[1], sys.argv[2]
