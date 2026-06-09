@@ -59,8 +59,8 @@ cd YACAID
 cp .env.__EXAMPLE__ .env
 ```
 
-Заполнить `.env` реальными значениями (сгенерировать секреты можно так:
-`python3 -c "import secrets; print(secrets.token_urlsafe(32))"`):
+Заполнить `.env` реальными значениями (сгенерировать случайный секрет:
+`python -c "import secrets; print(secrets.token_urlsafe(32))"`):
 
 | Переменная | Назначение |
 |---|---|
@@ -89,9 +89,25 @@ docker compose up -d --build
 
 ### B. recorder (без Docker, локально рядом с камерами)
 
+**Windows (PowerShell):**
+```powershell
+cd YACAID
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements-recorder.txt
+
+copy cfg\cfg.yml.__EXAMPLE__ cfg\cfg.yml
+copy cfg\cfg.local.yml.__EXAMPLE__ cfg\cfg.local.yml
+```
+
+> Если PowerShell запрещает выполнение скриптов, выполните один раз:
+> `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+
+**Linux / macOS:**
 ```bash
 cd YACAID
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements-recorder.txt
 
 cp cfg/cfg.yml.__EXAMPLE__ cfg/cfg.yml
@@ -115,10 +131,14 @@ cp cfg/cfg.local.yml.__EXAMPLE__ cfg/cfg.local.yml   # сюда — реальн
 Запуск (в форграунде, для проверки):
 
 ```bash
+# Windows
+python run_recorder.py
+
+# Linux / macOS
 python3 run_recorder.py
 ```
 
-Для постоянной работы — оформить как systemd-сервис, например:
+Для постоянной работы на **Linux** — оформить как systemd-сервис, например:
 
 ```ini
 # /etc/systemd/system/yacaid-recorder.service
