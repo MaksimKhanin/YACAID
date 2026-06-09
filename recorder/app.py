@@ -52,8 +52,11 @@ def _file_handler_proc(archive_cfg):
 
 def _control_proc(camera_names, control_cfg, ha_cfg):
     suffix = " (с интеграцией Home Assistant)" if ha_cfg.enabled else ""
-    main_logger.info(f"Запуск control-API на {control_cfg.host}:{control_cfg.port}{suffix}")
-    run_control_server(camera_names, control_cfg, ha_cfg)
+    main_logger.info(f"Запуск control-API на http://{control_cfg.host}:{control_cfg.port}{suffix}")
+    try:
+        run_control_server(camera_names, control_cfg, ha_cfg)
+    except Exception:
+        main_logger.exception("Критическая ошибка control_api")
 
 
 class ProcessSpec:
