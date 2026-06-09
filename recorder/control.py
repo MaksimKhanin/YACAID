@@ -8,6 +8,12 @@ e.g. Tailscale/WireGuard, from the archive server's UI) to:
     recorder doesn't need to reimplement device drivers — it just calls HA's REST API.
 """
 import os
+import sys
+
+# Allow running this file directly (python recorder/control.py) in addition to via run_recorder.py
+_project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
 import requests
 from fastapi import Body, FastAPI, Header, HTTPException
@@ -121,6 +127,11 @@ def create_app(camera_names, control_cfg: ControlConfig, ha_cfg: HomeAssistantCo
 
 
 def run_control_server(camera_names, control_cfg: ControlConfig, ha_cfg: HomeAssistantConfig = None):
+    import sys
+    import asyncio
     import uvicorn
+    # ProactorEventLoop (default on Windows Python 3.8+) can't bind sockets inside subprocesses
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     app = create_app(camera_names, control_cfg, ha_cfg)
     uvicorn.run(app, host=control_cfg.host, port=control_cfg.port, log_level="warning")
