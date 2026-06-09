@@ -11,6 +11,7 @@ from archive_server.modules.security.routes_ui import router as ui_router
 routers = [ui_router, control_router, ingest_router]
 
 nav_items = [
+    NavItem(slug="cameras", label="Охрана", icon="🛡", url="/cameras"),
     NavItem(slug="alerts", label="Тревоги", icon="⚠", url="/alerts"),
     NavItem(slug="archive", label="Архив", icon="🗂", url="/archive"),
 ]

@@ -11,6 +11,14 @@ from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, Unique
 from archive_server.core.db import Base
 
 
+class AlarmState(Base):
+    """Single-row table tracking the household alarm arm/disarm state."""
+    __tablename__ = "alarm_state"
+    id = Column(Integer, primary_key=True, default=1)
+    active = Column(Boolean, default=False, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class Media(Base):
     __tablename__ = "media"
     __table_args__ = (UniqueConstraint("camera", "filename", name="uq_media_camera_filename"),)
