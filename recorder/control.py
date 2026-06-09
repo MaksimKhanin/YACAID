@@ -53,6 +53,24 @@ def create_app(camera_names, control_cfg: ControlConfig, ha_cfg: HomeAssistantCo
     def health():
         return {"status": "ok", "cameras": list(camera_names), "home_assistant": ha_client is not None}
 
+    @app.post("/control/all/{action}")
+    def control_all(action: str, authorization: str = Header(default="")):
+        _check_token(authorization)
+
+        if action not in ACTIONS:
+            raise HTTPException(status_code=400, detail=f"Unknown action '{action}'")
+
+        signal_name, op = ACTIONS[action]
+        for camera in camera_names:
+            camera_dir = os.path.join(RESOURCES_DIR, camera)
+            if op == "set":
+                signals.set_signal(camera_dir, signal_name)
+            else:
+                signals.clear_signal(camera_dir, signal_name)
+
+        logger.info(f"Получена команда управления для всех камер: действие={action}")
+        return {"action": action, "cameras": list(camera_names), "status": "ok"}
+
     @app.post("/control/{camera}/{action}")
     def control(camera: str, action: str, authorization: str = Header(default="")):
         _check_token(authorization)
@@ -72,24 +90,6 @@ def create_app(camera_names, control_cfg: ControlConfig, ha_cfg: HomeAssistantCo
 
         logger.info(f"Получена команда управления: камера={camera}, действие={action}")
         return {"camera": camera, "action": action, "status": "ok"}
-
-    @app.post("/control/all/{action}")
-    def control_all(action: str, authorization: str = Header(default="")):
-        _check_token(authorization)
-
-        if action not in ACTIONS:
-            raise HTTPException(status_code=400, detail=f"Unknown action '{action}'")
-
-        signal_name, op = ACTIONS[action]
-        for camera in camera_names:
-            camera_dir = os.path.join(RESOURCES_DIR, camera)
-            if op == "set":
-                signals.set_signal(camera_dir, signal_name)
-            else:
-                signals.clear_signal(camera_dir, signal_name)
-
-        logger.info(f"Получена команда управления для всех камер: действие={action}")
-        return {"action": action, "cameras": list(camera_names), "status": "ok"}
 
     @app.post("/ha/service/{domain}/{service}")
     def ha_call_service(domain: str, service: str, payload: dict = Body(default={}),
