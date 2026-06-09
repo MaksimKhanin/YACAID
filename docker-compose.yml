@@ -31,6 +31,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       DATABASE_URL: postgresql://yacaid:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/yacaid_archive
       MEDIA_ROOT: /media
