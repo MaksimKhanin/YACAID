@@ -1,0 +1,22 @@
+<div class="alarm-card {{ 'alarm-armed' if alarm_active else 'alarm-disarmed' }}">
+    <div class="alarm-icon">{{ '🔴' if alarm_active else '🟢' }}</div>
+    <div class="alarm-text">{{ 'Охрана включена' if alarm_active else 'Охрана выключена' }}</div>
+</div>
+<div class="camera-actions">
+    <button class="action-btn alarm-btn-on"
+        hx-post="/control/alarm/on"
+        hx-target="#alarm-status"
+        hx-swap="innerHTML"
+        hx-disabled-elt="this"
+        {{ 'disabled' if alarm_active else '' }}>
+        🔴 Включить
+    </button>
+    <button class="action-btn alarm-btn-off"
+        hx-post="/control/alarm/off"
+        hx-target="#alarm-status"
+        hx-swap="innerHTML"
+        hx-disabled-elt="this"
+        {{ 'disabled' if not alarm_active else '' }}>
+        🟢 Выключить
+    </button>
+</div>

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from archive_server.core.auth import get_current_user
 from archive_server.core.db import get_db
 from archive_server.core.templating import templates
-from archive_server.modules.security.models import Media
+from archive_server.modules.security.models import AlarmState, Media
 
 router = APIRouter()
 
@@ -29,6 +29,17 @@ def _paginate(request: Request, q, page: int):
     items = q.offset((page - 1) * PAGE_SIZE).limit(PAGE_SIZE + 1).all()
     has_more = len(items) > PAGE_SIZE
     return items[:PAGE_SIZE], has_more
+
+
+@router.get("/cameras", response_class=HTMLResponse)
+def cameras_page(request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    alarm = db.get(AlarmState, 1)
+    alarm_active = alarm.active if alarm else False
+    return templates.TemplateResponse(request, "security/cameras.html", {
+        "alarm_active": alarm_active,
+        "active_tab": "cameras",
+        "title": "Охрана",
+    })
 
 
 @router.get("/alerts", response_class=HTMLResponse)
