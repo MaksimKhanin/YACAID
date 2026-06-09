@@ -16,6 +16,11 @@ SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 30  # 30 days
 _serializer = URLSafeTimedSerializer(settings.session_secret, salt="yacaid-session")
 
 
+class NotAuthenticatedException(Exception):
+    """No valid session — the app-level exception handler redirects to /login."""
+    pass
+
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
 
@@ -51,10 +56,10 @@ def _read_session(request: Request):
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     data = _read_session(request)
     if not data:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        raise NotAuthenticatedException()
     user = db.get(User, data["uid"])
     if user is None:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        raise NotAuthenticatedException()
     return user
 
 

@@ -7,11 +7,12 @@ that contributes its own routers and nav items. To add a module, build it under
 """
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from archive_server.core import routes_auth
+from archive_server.core.auth import NotAuthenticatedException
 from archive_server.core.config import settings
 from archive_server.core.db import Base, engine
 from archive_server.core.templating import templates
@@ -23,6 +24,12 @@ logger = get_logger("archive_server")
 MODULES = [security]
 
 app = FastAPI(title="YACAID Дом")
+
+
+@app.exception_handler(NotAuthenticatedException)
+def not_authenticated_handler(request: Request, exc: NotAuthenticatedException):
+    return RedirectResponse(url="/login", status_code=303)
+
 
 static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
