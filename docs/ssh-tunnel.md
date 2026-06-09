@@ -30,19 +30,32 @@ sudo -u tunnel mkdir -p /home/tunnel/.ssh
 
 ### Сгенерировать SSH-ключ специально для туннеля
 
+**Windows (PowerShell):**
+```powershell
+New-Item -ItemType Directory -Path "$env:USERPROFILE\.ssh" -Force
+ssh-keygen -t ed25519 -C "yacaid-tunnel" -f "$env:USERPROFILE\.ssh\yacaid_tunnel"
+# На запрос passphrase — Enter дважды (пустой пароль)
+```
+
+**Linux / macOS:**
 ```bash
 ssh-keygen -t ed25519 -C "yacaid-tunnel" -f ~/.ssh/yacaid_tunnel -N ""
 ```
 
 ### Скопировать публичный ключ на VPS
 
-```bash
-ssh-copy-id -i ~/.ssh/yacaid_tunnel.pub tunnel@VPS_IP
-# или вручную:
-cat ~/.ssh/yacaid_tunnel.pub | ssh user@VPS_IP "sudo -u tunnel tee -a /home/tunnel/.ssh/authorized_keys"
+**Windows (PowerShell)** — `ssh-copy-id` недоступен, копируем вручную:
+```powershell
+$pub = Get-Content "$env:USERPROFILE\.ssh\yacaid_tunnel.pub"
+ssh tunnel@VPS_IP "mkdir -p ~/.ssh && echo '$pub' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
 ```
 
-### Ограничить ключ только туннелями (на VPS, в /home/tunnel/.ssh/authorized_keys)
+**Linux / macOS:**
+```bash
+ssh-copy-id -i ~/.ssh/yacaid_tunnel.pub tunnel@VPS_IP
+```
+
+### Ограничить ключ только туннелями (на VPS, в ~/.ssh/authorized_keys)
 
 Добавьте перед ключом:
 ```
@@ -51,29 +64,90 @@ restrict,port-forwarding ssh-ed25519 AAAA...
 
 ### Проверить туннель вручную
 
+**Windows (PowerShell):**
+```powershell
+ssh -N -i "$env:USERPROFILE\.ssh\yacaid_tunnel" `
+    -o "ServerAliveInterval=30" `
+    -R 127.0.0.1:8090:127.0.0.1:8090 `
+    tunnel@VPS_IP
+```
+
+**Linux / macOS:**
 ```bash
 ssh -N -i ~/.ssh/yacaid_tunnel \
     -R 127.0.0.1:8090:127.0.0.1:8090 \
     tunnel@VPS_IP
 ```
 
-Если recorder отвечает на `127.0.0.1:8090`, с VPS должно работать:
+С VPS проверьте что туннель работает:
 ```bash
 curl http://127.0.0.1:8090/control/all/status
 ```
 
-## 3. Автозапуск через systemd (на локальной машине)
+## 3. Автозапуск туннеля
+
+### Windows — Task Scheduler (встроенный, рекомендуется)
+
+Создайте скрипт `C:\FamilyAssistant\YACAID\tunnel.ps1`:
+```powershell
+while ($true) {
+    Write-Host "$(Get-Date) Starting SSH tunnel..."
+    & ssh -N `
+        -i "$env:USERPROFILE\.ssh\yacaid_tunnel" `
+        -o "ServerAliveInterval=30" `
+        -o "ServerAliveCountMax=3" `
+        -o "ExitOnForwardFailure=yes" `
+        -o "StrictHostKeyChecking=accept-new" `
+        -R 127.0.0.1:8090:127.0.0.1:8090 `
+        tunnel@VPS_IP
+    Write-Host "$(Get-Date) Tunnel exited, restarting in 10s..."
+    Start-Sleep 10
+}
+```
+
+Зарегистрируйте задачу (запустите PowerShell **от администратора**):
+```powershell
+$action = New-ScheduledTaskAction `
+    -Execute "powershell.exe" `
+    -Argument "-WindowStyle Hidden -File C:\FamilyAssistant\YACAID\tunnel.ps1"
+
+$trigger = New-ScheduledTaskTrigger -AtLogOn
+
+$settings = New-ScheduledTaskSettingsSet `
+    -RestartOnIdle `
+    -ExecutionTimeLimit (New-TimeSpan -Hours 0)  # без ограничения времени
+
+Register-ScheduledTask `
+    -TaskName "YACAID SSH Tunnel" `
+    -Action $action `
+    -Trigger $trigger `
+    -Settings $settings `
+    -RunLevel Highest `
+    -Force
+
+# Запустить сразу, не дожидаясь перезагрузки:
+Start-ScheduledTask -TaskName "YACAID SSH Tunnel"
+```
+
+Проверить статус:
+```powershell
+Get-ScheduledTask -TaskName "YACAID SSH Tunnel" | Select-Object State
+```
+
+Остановить/удалить:
+```powershell
+Stop-ScheduledTask  -TaskName "YACAID SSH Tunnel"
+Unregister-ScheduledTask -TaskName "YACAID SSH Tunnel" -Confirm:$false
+```
+
+### Linux — systemd
 
 Установите `autossh`:
 ```bash
-# Ubuntu/Debian
-sudo apt install autossh
-# macOS
-brew install autossh
+sudo apt install autossh   # Ubuntu/Debian
 ```
 
-Создайте файл сервиса `~/.config/systemd/user/yacaid-tunnel.service`:
-
+Создайте `~/.config/systemd/user/yacaid-tunnel.service`:
 ```ini
 [Unit]
 Description=YACAID SSH reverse tunnel to VPS
@@ -97,19 +171,41 @@ RestartSec=10
 WantedBy=default.target
 ```
 
-Замените `VPS_IP` и `tunnel` на ваши значения.
-
-Включите и запустите:
 ```bash
 systemctl --user daemon-reload
-systemctl --user enable yacaid-tunnel
-systemctl --user start yacaid-tunnel
-systemctl --user status yacaid-tunnel
+systemctl --user enable --now yacaid-tunnel
+sudo loginctl enable-linger $USER  # жить без активной сессии
 ```
 
-Чтобы сервис жил без активной сессии пользователя:
+### macOS — LaunchAgent
+
+Создайте `~/Library/LaunchAgents/com.yacaid.tunnel.plist`:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.yacaid.tunnel</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/autossh</string>
+    <string>-N</string>
+    <string>-M</string><string>0</string>
+    <string>-i</string><string>/Users/YOU/.ssh/yacaid_tunnel</string>
+    <string>-o</string><string>ServerAliveInterval=30</string>
+    <string>-o</string><string>ServerAliveCountMax=3</string>
+    <string>-o</string><string>ExitOnForwardFailure=yes</string>
+    <string>-R</string><string>127.0.0.1:8090:127.0.0.1:8090</string>
+    <string>tunnel@VPS_IP</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+</dict>
+</plist>
+```
 ```bash
-sudo loginctl enable-linger $USER
+launchctl load ~/Library/LaunchAgents/com.yacaid.tunnel.plist
 ```
 
 ## 4. Настройка на VPS
